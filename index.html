@@ -1,0 +1,1092 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Métodos Numéricos - Área Financiera</title>
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f4f6f8;
+        color: #222;
+      }
+
+      header {
+        background: #1f2937;
+        color: white;
+        padding: 25px 15px;
+        text-align: center;
+      }
+
+      header h1 {
+        margin: 0 0 10px;
+        font-size: 28px;
+      }
+
+      header p {
+        margin: 0;
+        font-size: 15px;
+      }
+
+      nav {
+        background: #111827;
+        padding: 12px;
+        text-align: center;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      nav a {
+        color: white;
+        text-decoration: none;
+        margin: 0 10px;
+        font-size: 14px;
+      }
+
+      nav a:hover {
+        color: #facc15;
+      }
+
+      .container {
+        width: 92%;
+        max-width: 1100px;
+        margin: 25px auto;
+      }
+
+      section {
+        background: white;
+        padding: 25px;
+        margin-bottom: 25px;
+        border-radius: 12px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+      }
+
+      h2 {
+        color: #1f2937;
+        border-bottom: 2px solid #facc15;
+        padding-bottom: 8px;
+      }
+
+      h3 {
+        color: #374151;
+      }
+
+      .formula {
+        background: #f3f4f6;
+        padding: 12px;
+        border-left: 4px solid #facc15;
+        margin: 10px 0;
+        font-family: monospace;
+      }
+
+      .inputs {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 12px;
+        margin: 15px 0;
+      }
+
+      label {
+        font-weight: bold;
+        font-size: 14px;
+      }
+
+      input {
+        width: 100%;
+        padding: 9px;
+        margin-top: 5px;
+        border: 1px solid #bbb;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+
+      button {
+        border: none;
+        padding: 10px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        background: #1f2937;
+        color: white;
+        margin: 5px 3px;
+      }
+
+      button:hover {
+        background: #374151;
+      }
+
+      .btn-yellow {
+        background: #eab308;
+        color: #111;
+      }
+
+      .btn-red {
+        background: #dc2626;
+      }
+
+      .resultado {
+        margin-top: 15px;
+        padding: 15px;
+        background: #f9fafb;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+      }
+
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 9px;
+        text-align: center;
+      }
+
+      th {
+        background: #1f2937;
+        color: white;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+      }
+
+      .tab {
+        background: #d1d5db;
+        color: #111;
+      }
+
+      .tab.active {
+        background: #1f2937;
+        color: white;
+      }
+
+      .caso {
+        display: none;
+      }
+
+      .caso.active {
+        display: block;
+      }
+
+      .matriz {
+        display: grid;
+        grid-template-columns: repeat(4, 80px);
+        gap: 6px;
+        width: fit-content;
+        margin: 15px 0;
+      }
+
+      .matriz input {
+        width: 80px;
+        text-align: center;
+      }
+
+      .ecuacion {
+        font-family: monospace;
+        background: #f3f4f6;
+        padding: 12px;
+        border-radius: 6px;
+        margin: 5px 0;
+      }
+
+      .alerta {
+        background: #fee2e2;
+        border-left: 5px solid #dc2626;
+        padding: 15px;
+        margin-top: 15px;
+      }
+
+      footer {
+        background: #111827;
+        color: white;
+        text-align: center;
+        padding: 20px;
+        margin-top: 30px;
+      }
+
+      @media (max-width: 600px) {
+        .matriz {
+          grid-template-columns: repeat(4, 65px);
+        }
+
+        .matriz input {
+          width: 65px;
+        }
+
+        nav a {
+          display: inline-block;
+          margin: 5px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>Métodos Numéricos Aplicados al Área Financiera</h1>
+      <p>Desafío Integrador - Teoría de Errores, Taylor y Sistemas Lineales</p>
+    </header>
+
+    <nav>
+      <a href="#errores">Errores</a>
+      <a href="#taylor">Taylor</a>
+      <a href="#sistemas">Sistemas</a>
+      <a href="#conclusion">Conclusión</a>
+    </nav>
+
+    <div class="container">
+      <!-- ================= ERRORES ================= -->
+
+      <section id="errores">
+        <h2>1. Teoría de Errores</h2>
+
+        <p>
+          Comparamos un valor real o de referencia con un valor aproximado o
+          registrado. Los datos pueden ser modificados directamente en los
+          campos.
+        </p>
+
+        <div class="formula">Ea = |Valor real - Valor aproximado|</div>
+
+        <div class="formula">Er = Ea / |Valor real|</div>
+
+        <div class="formula">E% = Er × 100</div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Dato</th>
+              <th>Valor real</th>
+              <th>Valor registrado</th>
+              <th>Error absoluto</th>
+              <th>Error relativo</th>
+              <th>Error %</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+              <td>Ingreso diario</td>
+              <td>
+                <input type="number" id="real1" value="12500" />
+              </td>
+              <td>
+                <input type="number" id="aprox1" value="12420" />
+              </td>
+              <td id="ea1">-</td>
+              <td id="er1">-</td>
+              <td id="ep1">-</td>
+            </tr>
+
+            <tr>
+              <td>Costo operativo</td>
+              <td>
+                <input type="number" id="real2" value="7800" />
+              </td>
+              <td>
+                <input type="number" id="aprox2" value="7860" />
+              </td>
+              <td id="ea2">-</td>
+              <td id="er2">-</td>
+              <td id="ep2">-</td>
+            </tr>
+
+            <tr>
+              <td>Utilidad estimada</td>
+              <td>
+                <input type="number" id="real3" value="4700" />
+              </td>
+              <td>
+                <input type="number" id="aprox3" value="4560" />
+              </td>
+              <td id="ea3">-</td>
+              <td id="er3">-</td>
+              <td id="ep3">-</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <br />
+
+        <button class="btn-yellow" onclick="calcularErrores()">
+          Calcular errores
+        </button>
+
+        <div id="resultadoErrores" class="resultado"></div>
+      </section>
+
+      <!-- ================= TAYLOR ================= -->
+
+      <section id="taylor">
+        <h2>2. Aproximación de Taylor</h2>
+
+        <p>Se utiliza la función financiera:</p>
+
+        <div class="formula">C(t) = P × e<sup>rt</sup></div>
+
+        <h3>Datos</h3>
+
+        <div class="inputs">
+          <div>
+            <label>Capital P</label>
+            <input type="number" id="P" value="10000" />
+          </div>
+
+          <div>
+            <label>Tasa r</label>
+            <input type="number" id="r" value="0.05" step="0.001" />
+          </div>
+
+          <div>
+            <label>t₀</label>
+            <input type="number" id="t0" value="1" step="0.1" />
+          </div>
+
+          <div>
+            <label>t</label>
+            <input type="number" id="t" value="1.5" step="0.1" />
+          </div>
+        </div>
+
+        <h3>Derivadas</h3>
+
+        <div class="formula">C'(t) = Pr e<sup>rt</sup></div>
+
+        <div class="formula">C''(t) = Pr² e<sup>rt</sup></div>
+
+        <div class="formula">C'''(t) = Pr³ e<sup>rt</sup></div>
+
+        <button class="btn-yellow" onclick="calcularTaylor()">
+          Calcular Taylor
+        </button>
+
+        <div id="resultadoTaylor" class="resultado"></div>
+      </section>
+
+      <!-- ================= SISTEMAS ================= -->
+
+      <section id="sistemas">
+        <h2>3. Sistemas de Ecuaciones Lineales</h2>
+
+        <p>
+          En esta parte se pueden ingresar los coeficientes del sistema y
+          resolverlo mediante LU, Jacobi o Gauss-Seidel.
+        </p>
+
+        <div class="tabs">
+          <button class="tab active" onclick="mostrarCaso('ideal', this)">
+            Caso Ideal
+          </button>
+
+          <button class="tab" onclick="mostrarCaso('estres', this)">
+            Caso de Estrés
+          </button>
+
+          <button class="tab" onclick="mostrarCaso('condicionado', this)">
+            Caso Condicionado
+          </button>
+        </div>
+
+        <!-- ========== CASO IDEAL ========== -->
+
+        <div id="ideal" class="caso active">
+          <h3>Caso Ideal</h3>
+
+          <div class="ecuacion">10x₁ + 2x₂ + x₃ = 29</div>
+
+          <div class="ecuacion">x₁ + 9x₂ + 2x₃ = 25</div>
+
+          <div class="ecuacion">2x₁ + x₂ + 8x₃ = 28</div>
+
+          <h3>Ingrese los valores</h3>
+
+          <div class="matriz">
+            <input id="i11" value="10" />
+            <input id="i12" value="2" />
+            <input id="i13" value="1" />
+            <input id="ib1" value="29" />
+
+            <input id="i21" value="1" />
+            <input id="i22" value="9" />
+            <input id="i23" value="2" />
+            <input id="ib2" value="25" />
+
+            <input id="i31" value="2" />
+            <input id="i32" value="1" />
+            <input id="i33" value="8" />
+            <input id="ib3" value="28" />
+          </div>
+
+          <button onclick="resolverSistema('ideal', 'lu')">
+            Resolver con LU
+          </button>
+
+          <button onclick="resolverSistema('ideal', 'jacobi')">
+            Resolver con Jacobi
+          </button>
+
+          <button onclick="resolverSistema('ideal', 'seidel')">
+            Resolver con Gauss-Seidel
+          </button>
+
+          <div id="resultadoIdeal" class="resultado"></div>
+        </div>
+
+        <!-- ========== CASO ESTRÉS ========== -->
+
+        <div id="estres" class="caso">
+          <h3>Caso de Estrés</h3>
+
+          <p>
+            Se mantiene la misma matriz, pero cambian los valores financieros.
+          </p>
+
+          <div class="ecuacion">10x₁ + 2x₂ + x₃ = 29.5</div>
+
+          <div class="ecuacion">x₁ + 9x₂ + 2x₃ = 24.5</div>
+
+          <div class="ecuacion">2x₁ + x₂ + 8x₃ = 28.4</div>
+
+          <h3>Ingrese los valores</h3>
+
+          <div class="matriz">
+            <input id="s11" value="10" />
+            <input id="s12" value="2" />
+            <input id="s13" value="1" />
+            <input id="sb1" value="29.5" />
+
+            <input id="s21" value="1" />
+            <input id="s22" value="9" />
+            <input id="s23" value="2" />
+            <input id="sb2" value="24.5" />
+
+            <input id="s31" value="2" />
+            <input id="s32" value="1" />
+            <input id="s33" value="8" />
+            <input id="sb3" value="28.4" />
+          </div>
+
+          <button onclick="resolverSistema('estres', 'jacobi')">
+            Resolver con Jacobi
+          </button>
+
+          <button onclick="resolverSistema('estres', 'seidel')">
+            Resolver con Gauss-Seidel
+          </button>
+
+          <div id="resultadoEstres" class="resultado"></div>
+        </div>
+
+        <!-- ========== CASO CONDICIONADO ========== -->
+
+        <div id="condicionado" class="caso">
+          <h3>Mal Condicionado</h3>
+
+          <p>
+            Este caso permite observar cómo una pequeña modificación en los
+            datos puede producir cambios importantes en la solución.
+          </p>
+
+          <div class="ecuacion">x₁ + x₂ + x₃ = 6</div>
+
+          <div class="ecuacion">1.001x₁ + x₂ + x₃ = 6.001</div>
+
+          <div class="ecuacion">x₁ + 1.001x₂ + x₃ = 6.002</div>
+
+          <h3>Ingrese los valores</h3>
+
+          <div class="matriz">
+            <input id="c11" value="1" />
+            <input id="c12" value="1" />
+            <input id="c13" value="1" />
+            <input id="cb1" value="6" />
+
+            <input id="c21" value="1.001" />
+            <input id="c22" value="1" />
+            <input id="c23" value="1" />
+            <input id="cb2" value="6.001" />
+
+            <input id="c31" value="1" />
+            <input id="c32" value="1.001" />
+            <input id="c33" value="1" />
+            <input id="cb3" value="6.002" />
+          </div>
+
+          <button onclick="resolverCondicionado()">Resolver y comparar</button>
+
+          <div id="resultadoCondicionado" class="resultado"></div>
+        </div>
+      </section>
+
+      <!-- ================= CONCLUSION ================= -->
+
+      <section id="conclusion">
+        <h2>4. Conclusión</h2>
+
+        <p>
+          Los métodos numéricos permiten analizar y resolver problemas
+          financieros cuando los datos no pueden ser tratados únicamente de
+          manera exacta.
+        </p>
+
+        <p>
+          La teoría de errores permite conocer qué tan diferente es un valor
+          registrado respecto a un valor de referencia.
+        </p>
+
+        <p>
+          La aproximación de Taylor permite estimar valores financieros
+          utilizando una función y sus derivadas.
+        </p>
+
+        <p>
+          Los métodos LU, Jacobi y Gauss-Seidel permiten resolver sistemas de
+          ecuaciones lineales relacionados con diferentes áreas financieras.
+        </p>
+
+        <p>
+          Finalmente, el caso condicionado demuestra que una pequeña
+          modificación en los datos puede provocar una variación importante en
+          los resultados, por lo que es importante trabajar con datos
+          financieros confiables.
+        </p>
+      </section>
+    </div>
+
+    <footer>Métodos Numéricos Aplicados al Área Financiera</footer>
+
+    <script>
+      /* =====================================================
+   FUNCIONES GENERALES
+===================================================== */
+
+      function numero(id) {
+        return parseFloat(document.getElementById(id).value) || 0;
+      }
+
+      function mostrarNumero(valor) {
+        return Number(valor).toFixed(6);
+      }
+
+      /* =====================================================
+   TEORÍA DE ERRORES
+===================================================== */
+
+      function calcularErrores() {
+        let total = "";
+
+        for (let i = 1; i <= 3; i++) {
+          let real = numero("real" + i);
+          let aprox = numero("aprox" + i);
+
+          let ea = Math.abs(real - aprox);
+
+          let er = real !== 0 ? ea / Math.abs(real) : 0;
+
+          let ep = er * 100;
+
+          document.getElementById("ea" + i).innerText = mostrarNumero(ea);
+
+          document.getElementById("er" + i).innerText = mostrarNumero(er);
+
+          document.getElementById("ep" + i).innerText = mostrarNumero(ep) + "%";
+
+          total +=
+            "<p><b>Dato " +
+            i +
+            ":</b> " +
+            "Error absoluto = " +
+            mostrarNumero(ea) +
+            ", Error relativo = " +
+            mostrarNumero(er) +
+            ", Error porcentual = " +
+            mostrarNumero(ep) +
+            "%</p>";
+        }
+
+        document.getElementById("resultadoErrores").innerHTML = total;
+      }
+
+      /* =====================================================
+   TAYLOR
+===================================================== */
+
+      function calcularTaylor() {
+        let P = numero("P");
+        let r = numero("r");
+        let t0 = numero("t0");
+        let t = numero("t");
+
+        let h = t - t0;
+
+        // Valor exacto
+        let exacto = P * Math.exp(r * t);
+
+        // Derivadas evaluadas en t0
+        let c0 = P * Math.exp(r * t0);
+
+        let c1 = P * r * Math.exp(r * t0);
+
+        let c2 = P * r * r * Math.exp(r * t0);
+
+        let c3 = P * r * r * r * Math.exp(r * t0);
+
+        // Taylor de orden 1
+        let T1 = c0 + c1 * h;
+
+        // Taylor de orden 2
+        let T2 = c0 + c1 * h + (c2 * Math.pow(h, 2)) / 2;
+
+        // Taylor de orden 3
+        let T3 =
+          c0 + c1 * h + (c2 * Math.pow(h, 2)) / 2 + (c3 * Math.pow(h, 3)) / 6;
+
+        // Errores absolutos
+        let error1 = Math.abs(exacto - T1);
+        let error2 = Math.abs(exacto - T2);
+        let error3 = Math.abs(exacto - T3);
+
+        // Determinar cuál tiene el menor error
+        let mejorOrden = 1;
+        let menorError = error1;
+
+        if (error2 < menorError) {
+          menorError = error2;
+          mejorOrden = 2;
+        }
+
+        if (error3 < menorError) {
+          menorError = error3;
+          mejorOrden = 3;
+        }
+
+        document.getElementById("resultadoTaylor").innerHTML = `
+
+        <table>
+
+        <tr>
+            <th>Método</th>
+            <th>Resultado</th>
+            <th>Error absoluto</th>
+        </tr>
+
+        <tr>
+            <td>Valor exacto</td>
+            <td>${mostrarNumero(exacto)} Bs</td>
+            <td>-</td>
+        </tr>
+
+        <tr>
+            <td>Taylor orden 1</td>
+            <td>${mostrarNumero(T1)} Bs</td>
+            <td>${mostrarNumero(error1)}</td>
+        </tr>
+
+        <tr>
+            <td>Taylor orden 2</td>
+            <td>${mostrarNumero(T2)} Bs</td>
+            <td>${mostrarNumero(error2)}</td>
+        </tr>
+
+        <tr>
+            <td>Taylor orden 3</td>
+            <td>${mostrarNumero(T3)} Bs</td>
+            <td>${mostrarNumero(error3)}</td>
+        </tr>
+
+        </table>
+
+        <div class="resultado" style="margin-top:15px;">
+
+            <h3>Mejor aproximación</h3>
+
+            <p>
+                El <b>polinomio de Taylor de orden ${mejorOrden}</b>
+                produjo la mejor aproximación.
+            </p>
+
+            <p>
+                Su error absoluto fue:
+                <b>${mostrarNumero(menorError)}</b>
+            </p>
+
+            <p>
+                Por lo tanto, entre los órdenes evaluados,
+                el orden ${mejorOrden} es el que más se aproxima
+                al valor exacto.
+            </p>
+
+        </div>
+    `;
+      }
+      /* =====================================================
+   OBTENER MATRIZ
+===================================================== */
+
+      function obtenerSistema(tipo) {
+        let p;
+
+        if (tipo === "ideal") p = "i";
+        if (tipo === "estres") p = "s";
+        if (tipo === "condicionado") p = "c";
+
+        let A = [
+          [numero(p + "11"), numero(p + "12"), numero(p + "13")],
+          [numero(p + "21"), numero(p + "22"), numero(p + "23")],
+          [numero(p + "31"), numero(p + "32"), numero(p + "33")],
+        ];
+
+        let b = [numero(p + "b1"), numero(p + "b2"), numero(p + "b3")];
+
+        return {
+          A: A,
+          b: b,
+        };
+      }
+
+      /* =====================================================
+   LU
+===================================================== */
+
+      function resolverLU(A, b) {
+        let n = A.length;
+
+        let L = [
+          [1, 0, 0],
+          [0, 1, 0],
+          [0, 0, 1],
+        ];
+
+        let U = [
+          [A[0][0], A[0][1], A[0][2]],
+          [0, 0, 0],
+          [0, 0, 0],
+        ];
+
+        for (let i = 1; i < n; i++) {
+          U[i][0] = A[i][0];
+
+          let factor = U[i][0] / U[0][0];
+
+          L[i][0] = factor;
+
+          U[i][1] = A[i][1] - factor * U[0][1];
+
+          U[i][2] = A[i][2] - factor * U[0][2];
+        }
+
+        L[2][1] = U[2][1] / U[1][1];
+
+        U[2][2] = U[2][2] - L[2][1] * U[1][2];
+
+        /* Ly = b */
+
+        let y = [];
+
+        y[0] = b[0];
+
+        y[1] = b[1] - L[1][0] * y[0];
+
+        y[2] = b[2] - L[2][0] * y[0] - L[2][1] * y[1];
+
+        /* Ux = y */
+
+        let x = [];
+
+        x[2] = y[2] / U[2][2];
+
+        x[1] = (y[1] - U[1][2] * x[2]) / U[1][1];
+
+        x[0] = (y[0] - U[0][1] * x[1] - U[0][2] * x[2]) / U[0][0];
+
+        return x;
+      }
+
+      /* =====================================================
+   JACOBI
+===================================================== */
+
+      function resolverJacobi(A, b) {
+        let x = [0, 0, 0];
+
+        let tolerancia = 0.000001;
+        let maxIter = 50;
+
+        let iter = 0;
+        let error = Infinity;
+
+        while (error > tolerancia && iter < maxIter) {
+          let nuevo = [0, 0, 0];
+
+          nuevo[0] = (b[0] - A[0][1] * x[1] - A[0][2] * x[2]) / A[0][0];
+
+          nuevo[1] = (b[1] - A[1][0] * x[0] - A[1][2] * x[2]) / A[1][1];
+
+          nuevo[2] = (b[2] - A[2][0] * x[0] - A[2][1] * x[1]) / A[2][2];
+
+          error = Math.max(
+            Math.abs(nuevo[0] - x[0]),
+            Math.abs(nuevo[1] - x[1]),
+            Math.abs(nuevo[2] - x[2]),
+          );
+
+          x = nuevo;
+
+          iter++;
+        }
+
+        return {
+          x: x,
+          iteraciones: iter,
+          error: error,
+        };
+      }
+
+      /* =====================================================
+   GAUSS-SEIDEL
+===================================================== */
+
+      function resolverSeidel(A, b) {
+        let x = [0, 0, 0];
+
+        let tolerancia = 0.000001;
+        let maxIter = 50;
+
+        let iter = 0;
+        let error = Infinity;
+
+        while (error > tolerancia && iter < maxIter) {
+          let anterior = [...x];
+
+          x[0] = (b[0] - A[0][1] * x[1] - A[0][2] * x[2]) / A[0][0];
+
+          x[1] = (b[1] - A[1][0] * x[0] - A[1][2] * x[2]) / A[1][1];
+
+          x[2] = (b[2] - A[2][0] * x[0] - A[2][1] * x[1]) / A[2][2];
+
+          error = Math.max(
+            Math.abs(x[0] - anterior[0]),
+            Math.abs(x[1] - anterior[1]),
+            Math.abs(x[2] - anterior[2]),
+          );
+
+          iter++;
+        }
+
+        return {
+          x: x,
+          iteraciones: iter,
+          error: error,
+        };
+      }
+
+      /* =====================================================
+   RESOLVER SISTEMAS
+===================================================== */
+
+      function resolverSistema(tipo, metodo) {
+        let sistema = obtenerSistema(tipo);
+
+        let A = sistema.A;
+        let b = sistema.b;
+
+        let resultado;
+        let nombre;
+
+        if (metodo === "lu") {
+          resultado = {
+            x: resolverLU(A, b),
+            iteraciones: "No aplica",
+            error: "No aplica",
+          };
+
+          nombre = "LU";
+        } else if (metodo === "jacobi") {
+          resultado = resolverJacobi(A, b);
+
+          nombre = "Jacobi";
+        } else {
+          resultado = resolverSeidel(A, b);
+
+          nombre = "Gauss-Seidel";
+        }
+
+        let id;
+
+        if (tipo === "ideal") id = "resultadoIdeal";
+
+        if (tipo === "estres") id = "resultadoEstres";
+
+        document.getElementById(id).innerHTML = `
+
+        <h3>Resultado: ${nombre}</h3>
+
+        <p>
+        x₁ = <b>${mostrarNumero(resultado.x[0])}</b>
+        </p>
+
+        <p>
+        x₂ = <b>${mostrarNumero(resultado.x[1])}</b>
+        </p>
+
+        <p>
+        x₃ = <b>${mostrarNumero(resultado.x[2])}</b>
+        </p>
+
+        <p>
+        Iteraciones: <b>${resultado.iteraciones}</b>
+        </p>
+
+        <p>
+        Error final:
+        <b>${
+          typeof resultado.error === "number"
+            ? mostrarNumero(resultado.error)
+            : resultado.error
+        }</b>
+        </p>
+    `;
+      }
+
+      /* =====================================================
+   CASO CONDICIONADO
+===================================================== */
+
+      function resolverCondicionado() {
+        let sistema = obtenerSistema("condicionado");
+
+        let A = sistema.A;
+        let b = sistema.b;
+
+        let original = resolverLU(A, b);
+
+        /* Se modifica el último valor:
+       6.002 → 6.003
+    */
+
+        let bNuevo = [...b];
+
+        bNuevo[2] = bNuevo[2] + 0.001;
+
+        let perturbado = resolverLU(A, bNuevo);
+
+        let cambio1 = perturbado[0] - original[0];
+
+        let cambio2 = perturbado[1] - original[1];
+
+        let cambio3 = perturbado[2] - original[2];
+
+        document.getElementById("resultadoCondicionado").innerHTML = `
+
+        <h3>Resultado original</h3>
+
+        <p>x₁ = ${mostrarNumero(original[0])}</p>
+        <p>x₂ = ${mostrarNumero(original[1])}</p>
+        <p>x₃ = ${mostrarNumero(original[2])}</p>
+
+        <h3>Después de cambiar b₃</h3>
+
+        <p>
+        b₃ pasó de
+        <b>${mostrarNumero(b[2])}</b>
+        a
+        <b>${mostrarNumero(bNuevo[2])}</b>
+        </p>
+
+        <p>x₁ = ${mostrarNumero(perturbado[0])}</p>
+        <p>x₂ = ${mostrarNumero(perturbado[1])}</p>
+        <p>x₃ = ${mostrarNumero(perturbado[2])}</p>
+
+        <h3>Cambio producido</h3>
+
+        <table>
+
+        <tr>
+            <th>Variable</th>
+            <th>Original</th>
+            <th>Perturbado</th>
+            <th>Cambio</th>
+        </tr>
+
+        <tr>
+            <td>x₁</td>
+            <td>${mostrarNumero(original[0])}</td>
+            <td>${mostrarNumero(perturbado[0])}</td>
+            <td>${mostrarNumero(cambio1)}</td>
+        </tr>
+
+        <tr>
+            <td>x₂</td>
+            <td>${mostrarNumero(original[1])}</td>
+            <td>${mostrarNumero(perturbado[1])}</td>
+            <td>${mostrarNumero(cambio2)}</td>
+        </tr>
+
+        <tr>
+            <td>x₃</td>
+            <td>${mostrarNumero(original[2])}</td>
+            <td>${mostrarNumero(perturbado[2])}</td>
+            <td>${mostrarNumero(cambio3)}</td>
+        </tr>
+
+        </table>
+
+        <div class="alerta">
+            <b>Conclusión:</b>
+            Se modificó solamente un dato de la ecuación.
+            Este caso permite observar cómo una pequeña perturbación
+            en los datos puede afectar la solución del sistema.
+        </div>
+    `;
+      }
+
+      /* =====================================================
+   PESTAÑAS
+===================================================== */
+
+      function mostrarCaso(id, boton) {
+        let casos = document.querySelectorAll(".caso");
+
+        casos.forEach(function (caso) {
+          caso.classList.remove("active");
+        });
+
+        let botones = document.querySelectorAll(".tab");
+
+        botones.forEach(function (btn) {
+          btn.classList.remove("active");
+        });
+
+        document.getElementById(id).classList.add("active");
+
+        boton.classList.add("active");
+      }
+
+      /* =====================================================
+   CALCULAR AUTOMÁTICAMENTE AL ABRIR
+===================================================== */
+
+      window.onload = function () {
+        calcularErrores();
+
+        calcularTaylor();
+
+        resolverSistema("ideal", "lu");
+      };
+    </script>
+  </body>
+</html>
