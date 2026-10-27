@@ -1,0 +1,1281 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Integración Numérica | Métodos Numéricos</title>
+    <style>
+      :root {
+        --principal: #1e293b;
+        --principal-claro: #334155;
+        --secundario: #eab308;
+        --accion: #dc2626;
+        --fondo: #f6f7ee;
+        --blanco: #fff;
+        --texto: #172033;
+        --muted: #64748b;
+        --borde: #dbe1e8;
+        --verde: #166534;
+        --rojo: #b91c1c;
+        --sombra: 0 8px 25px rgba(30, 41, 59, 0.08);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--fondo);
+        color: var(--texto);
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 1.55;
+      }
+      header {
+        background: var(--principal);
+        color: #fff;
+        padding: 28px 18px;
+        border-bottom: 5px solid var(--secundario);
+      }
+      .hero {
+        max-width: 1150px;
+        margin: auto;
+      }
+      header h1 {
+        margin: 0 0 7px;
+        font-size: clamp(1.6rem, 4vw, 2.35rem);
+      }
+      header p {
+        margin: 0;
+        color: #e2e8f0;
+      }
+      main {
+        max-width: 1150px;
+        margin: 25px auto;
+        padding: 0 16px 40px;
+      }
+      .card {
+        background: var(--blanco);
+        border: 1px solid var(--borde);
+        border-radius: 15px;
+        padding: 22px;
+        margin-bottom: 20px;
+        box-shadow: var(--sombra);
+      }
+      h2 {
+        font-size: 1.25rem;
+        color: var(--principal);
+        margin: 0 0 14px;
+      }
+      h3 {
+        font-size: 1.05rem;
+        color: var(--principal);
+        margin: 18px 0 8px;
+      }
+      p {
+        margin-top: 7px;
+      }
+      .small {
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 0;
+      }
+      label {
+        font-weight: 700;
+        font-size: 0.92rem;
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 11px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 9px;
+        background: #fff;
+        color: var(--texto);
+        font: inherit;
+      }
+      textarea {
+        min-height: 190px;
+        resize: vertical;
+        font-family: Consolas, monospace;
+        font-size: 0.9rem;
+      }
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: 2px solid #facc15;
+        border-color: #ca8a04;
+      }
+      button {
+        border: 0;
+        border-radius: 9px;
+        padding: 11px 15px;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.15s;
+      }
+      button:hover {
+        filter: brightness(0.95);
+        transform: translateY(-1px);
+      }
+      .primary {
+        background: var(--accion);
+        color: white;
+      }
+      .secondary {
+        background: var(--principal);
+        color: white;
+      }
+      .light {
+        background: #e2e8f0;
+        color: var(--principal);
+      }
+      .gold {
+        background: var(--secundario);
+        color: #422006;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+        margin-top: 14px;
+      }
+      .notice {
+        background: #fffbeb;
+        border-left: 4px solid var(--secundario);
+        padding: 12px 14px;
+        border-radius: 7px;
+      }
+      .error {
+        background: #fef2f2;
+        border-left: 4px solid var(--accion);
+        padding: 12px 14px;
+        border-radius: 7px;
+        color: #7f1d1d;
+      }
+      .success {
+        background: #f0fdf4;
+        border-left: 4px solid #16a34a;
+        padding: 12px 14px;
+        border-radius: 7px;
+        color: #14532d;
+      }
+      .pill {
+        display: inline-block;
+        border-radius: 999px;
+        background: #e2e8f0;
+        padding: 4px 9px;
+        font-size: 0.82rem;
+        font-weight: 700;
+      }
+      .hidden {
+        display: none !important;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 10px;
+        font-size: 0.92rem;
+      }
+      th,
+      td {
+        padding: 9px 10px;
+        border: 1px solid var(--borde);
+        text-align: right;
+      }
+      th {
+        background: #f1f5f9;
+        color: var(--principal);
+      }
+      th:first-child,
+      td:first-child {
+        text-align: center;
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+      .result-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .result {
+        padding: 15px;
+        border-radius: 12px;
+        background: #f8fafc;
+        border: 1px solid var(--borde);
+      }
+      .result .name {
+        font-size: 0.85rem;
+        color: var(--muted);
+        font-weight: 700;
+      }
+      .result .value {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--principal);
+        overflow-wrap: anywhere;
+      }
+      .result .unit {
+        font-size: 0.82rem;
+        color: var(--muted);
+      }
+      #chart {
+        width: 100%;
+        height: 320px;
+        display: block;
+        border: 1px solid var(--borde);
+        border-radius: 10px;
+        background: white;
+      }
+      footer {
+        background: var(--principal);
+        color: #e2e8f0;
+        text-align: center;
+        padding: 20px;
+      }
+      ul {
+        padding-left: 22px;
+      }
+      details {
+        margin-top: 12px;
+      }
+      summary {
+        cursor: pointer;
+        font-weight: 700;
+        color: var(--principal);
+      }
+      @media (max-width: 750px) {
+        .grid,
+        .grid-3,
+        .result-grid {
+          grid-template-columns: 1fr;
+        }
+        .card {
+          padding: 16px;
+        }
+        header {
+          padding: 23px 16px;
+        }
+        th,
+        td {
+          padding: 7px;
+          font-size: 0.85rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="hero">
+        <span class="pill">MÉTODOS NUMÉRICOS</span>
+        <h1>Calculadora de Integración Numérica</h1>
+        <p>Trapecio compuesto · Simpson 1/3 · Simpson 3/8</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>1. Seleccionar ejercicio</h2>
+        <p class="small">
+          Selecciona uno de los problemas y carga sus datos de referencia.
+          Puedes editarlos antes de calcular.
+        </p>
+        <div class="grid">
+          <div class="field">
+            <label for="exercise">Ejercicio</label>
+            <select id="exercise">
+              <option value="19">19. Distancia de un vehículo</option>
+              <option value="20">20. Trabajo de una banda elástica</option>
+              <option value="21">21. Área de un perfil topográfico</option>
+              <option value="22">22. Longitud de una catenaria</option>
+              <option value="23">23. Caudal de una tubería</option>
+              <option value="24">24. Longitud de una cardioide</option>
+              <option value="25">25. Variación de energía potencial</option>
+              <option value="26">26. Área de un lago</option>
+              <option value="27">27. Volumen de un objeto alargado</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="mode">Tipo de ingreso</label>
+            <select id="mode">
+              <option value="table">Datos tabulados (x, y)</option>
+              <option value="function">Función matemática f(x)</option>
+            </select>
+          </div>
+        </div>
+        <div id="exerciseInfo" class="notice" style="margin-top: 15px"></div>
+        <div class="actions">
+          <button id="loadExample" class="secondary" type="button">
+            Cargar datos del ejercicio
+          </button>
+          <button id="validationTest" class="light" type="button">
+            Cargar prueba f(x) = x²
+          </button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>2. Ingresar los datos</h2>
+        <div id="tableInputs">
+          <div class="field">
+            <label for="dataInput">Pares x, y (un par por línea)</label>
+            <textarea
+              id="dataInput"
+              spellcheck="false"
+              placeholder="Ejemplo:
+0, 0
+1, 1
+2, 4
+3, 9"
+            ></textarea>
+            <span class="small"
+              >Escribe un valor x y un valor y separados por coma. Debe haber al
+              menos dos puntos y los valores x deben crecer de manera uniforme
+              para aplicar Simpson.</span
+            >
+          </div>
+        </div>
+        <div id="functionInputs" class="hidden">
+          <div class="grid">
+            <div class="field">
+              <label for="functionInput">Función f(x)</label>
+              <input id="functionInput" value="x^2" spellcheck="false" />
+              <span class="small"
+                >Operadores: + − * / ^. Funciones: sin, cos, tan, sqrt, abs,
+                exp, log, sinh, cosh. Usa pi para π.</span
+              >
+            </div>
+            <div class="field">
+              <label for="lower">Límite inferior (a)</label>
+              <input id="lower" type="number" step="any" value="0" />
+              <label for="upper">Límite superior (b)</label>
+              <input id="upper" type="number" step="any" value="2" />
+            </div>
+          </div>
+          <div class="grid" style="margin-top: 14px">
+            <div class="field">
+              <label for="intervals">Número de subintervalos (n)</label>
+              <input id="intervals" type="number" min="1" step="1" value="4" />
+            </div>
+            <div class="field">
+              <label>Espaciado</label>
+              <input value="h = (b - a) / n" disabled />
+            </div>
+          </div>
+        </div>
+        <div class="grid" style="margin-top: 16px">
+          <div class="field">
+            <label for="method">Método de integración</label>
+            <select id="method">
+              <option value="all">Comparar los métodos compatibles</option>
+              <option value="trapezoid">Trapecio compuesto</option>
+              <option value="simpson13">Simpson 1/3</option>
+              <option value="simpson38">Simpson 3/8</option>
+              <option value="combined">Simpson combinado (1/3 + 3/8)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="unit">Unidad del resultado</label>
+            <input
+              id="unit"
+              value="unidades²"
+              placeholder="Ej.: m, J, mi, in³/s"
+            />
+            <span class="small"
+              >Cambia la unidad según lo que represente la integral.</span
+            >
+          </div>
+        </div>
+        <div class="actions">
+          <button id="calculate" class="primary" type="button">
+            Calcular integral
+          </button>
+          <button id="clear" class="light" type="button">Limpiar datos</button>
+        </div>
+        <div id="message" aria-live="polite" style="margin-top: 14px"></div>
+      </section>
+
+      <section id="resultsSection" class="card hidden">
+        <h2>3. Resultados</h2>
+        <div id="resultCards" class="result-grid"></div>
+        <h3>Tabla de nodos y pesos</h3>
+        <p class="small">
+          Los pesos muestran cuánto aporta cada dato en el método seleccionado.
+          En la tabla se incluyen los valores de la función o los datos
+          ingresados.
+        </p>
+        <div id="weightsTable" class="table-wrap"></div>
+        <h3>Gráfico de los datos y el área aproximada</h3>
+        <canvas
+          id="chart"
+          width="1000"
+          height="320"
+          aria-label="Gráfico de la función y área integrada"
+        ></canvas>
+        <p id="graphNote" class="small"></p>
+        <h3>Comparación y error</h3>
+        <div id="comparison"></div>
+      </section>
+
+      <section class="card">
+        <h2>4. Prueba de verificación</h2>
+        <p>
+          La guía pide comprobar la aplicación con la función
+          <strong>f(x) = x²</strong> en el intervalo de 0 a 2. La integral
+          exacta es:
+        </p>
+        <p style="font-size: 1.15rem; text-align: center">
+          <strong>∫₀² x² dx = 8/3 ≈ 2.666667</strong>
+        </p>
+        <p class="small">
+          Pulsa “Cargar prueba f(x) = x²” y luego “Calcular integral”. Simpson
+          1/3 debe dar el valor exacto (salvo redondeo) cuando n sea par. El
+          trapecio es una aproximación.
+        </p>
+      </section>
+
+      <section class="card">
+        <h2>5. ¿Cómo usar la página?</h2>
+        <ol>
+          <li>Escoge el ejercicio que quieres resolver.</li>
+          <li>
+            Presiona <strong>Cargar datos del ejercicio</strong> para colocar
+            los datos de ejemplo.
+          </li>
+          <li>
+            Si necesitas, cambia los datos, los límites, la función o el número
+            de subintervalos.
+          </li>
+          <li>
+            Selecciona un método o la opción para comparar los métodos
+            compatibles.
+          </li>
+          <li>
+            Presiona <strong>Calcular integral</strong> y revisa los resultados,
+            la tabla y el gráfico.
+          </li>
+        </ol>
+        <div class="notice">
+          <strong>Importante:</strong> el ejercicio 26 no incluye una tabla
+          oficial de anchuras del lago en la guía. Debes introducir las anchuras
+          medidas de la figura; por eso no se puede obtener una única
+          aproximación reproducible sin esos datos.
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <strong>Integración Numérica</strong><br />
+      <span>Métodos Numéricos · Aplicación educativa</span>
+    </footer>
+
+    <script>
+      "use strict";
+
+      const $ = (id) => document.getElementById(id);
+      const exercises = {
+        19: {
+          title: "Distancia de un vehículo",
+          info: "Se estima la distancia integrando la velocidad de los primeros 7 segundos. La velocidad está en mi/h y el tiempo en segundos. Para convertir el resultado a millas, divide la integral por 3600.",
+          mode: "table",
+          unit: "mi",
+          factor: 1 / 3600,
+          data: [
+            [0, 0],
+            [1, 14],
+            [2, 39],
+            [3, 69],
+            [4, 95],
+            [5, 114],
+            [6, 129],
+            [7, 139],
+          ],
+          reference: 0.147072,
+          refLabel: "Referencia aproximada (Simpson combinado)",
+          note: "La integral de velocidad en mi/h respecto a segundos se divide entre 3600 para obtener millas.",
+        },
+        20: {
+          title: "Trabajo de una banda elástica",
+          info: "El trabajo se calcula integrando la fuerza respecto al desplazamiento. Los datos del documento están en pulgadas y libras; el resultado se expresa en lb·in.",
+          mode: "table",
+          unit: "lb·in",
+          factor: 1,
+          data: [
+            [0, 0],
+            [0.4, 0.85],
+            [0.8, 1.3],
+            [1.2, 1.6],
+            [1.6, 1.87],
+            [2.0, 2.14],
+            [2.4, 2.34],
+            [2.8, 2.52],
+          ],
+          reference: 4.577167,
+          refLabel: "Referencia aproximada (Simpson combinado)",
+          note: "La integral de fuerza respecto al desplazamiento representa el trabajo.",
+        },
+        21: {
+          title: "Área de un perfil topográfico",
+          info: "Se estima el área bajo el perfil entre x = 1 y x = 10. Los valores de y son datos ilustrativos aproximados extraídos visualmente de una gráfica.",
+          mode: "table",
+          unit: "u²",
+          factor: 1,
+          data: [
+            [1, 1.3],
+            [2, 3.7],
+            [3, 4.6],
+            [4, 4.4],
+            [5, 2.7],
+            [6, 2.5],
+            [7, 3.6],
+            [8, 5.3],
+            [9, 6.0],
+            [10, 5.9],
+          ],
+          reference: 36.85,
+          refLabel: "Referencia aproximada (Simpson + trapecio)",
+          note: "La precisión depende de qué tan bien se hayan leído las coordenadas de la gráfica.",
+        },
+        22: {
+          title: "Longitud de una catenaria",
+          info: "La longitud se obtiene integrando √(1 + [y′(x)]²). Para y = 24 cosh(x/24), el integrando se simplifica a cosh(x/24), entre x = -12 y x = 26 ft.",
+          mode: "function",
+          unit: "ft",
+          fn: "cosh(x/24)",
+          a: -12,
+          b: 26,
+          n: 8,
+          reference: 43.898841,
+          refLabel: "Valor exacto de referencia",
+          note: "Es un modelo geométrico simplificado de un cable, no un cálculo de ingeniería de un teleférico.",
+        },
+        23: {
+          title: "Caudal de una tubería",
+          info: "El caudal se calcula integrando 2πr·v(r). Se usa v(r) = 80(1 − r/R)^(1/7), con R = 0.25 pulgadas. El integrando es 160πr(1 − r/0.25)^(1/7).",
+          mode: "function",
+          unit: "in³/s",
+          fn: "160*pi*x*(1-x/0.25)^(1/7)",
+          a: 0,
+          b: 0.25,
+          n: 8,
+          reference: 12.82817,
+          refLabel: "Valor exacto de referencia",
+          note: "El perfil de velocidad cambia rápidamente cerca de la pared, por lo que la aproximación numérica puede converger más lentamente.",
+        },
+        24: {
+          title: "Longitud de una cardioide",
+          info: "Para la trayectoria paramétrica indicada en la guía, con b = 5, el integrando de longitud se simplifica a 20 sin(t/2) en el intervalo de 0 a 2π.",
+          mode: "function",
+          unit: "unidades",
+          fn: "20*sin(x/2)",
+          a: 0,
+          b: 2 * Math.PI,
+          n: 8,
+          reference: 80,
+          refLabel: "Valor exacto de referencia",
+          note: "La longitud exacta de la cardioide para estos datos es 80 unidades.",
+        },
+        25: {
+          title: "Variación de energía potencial",
+          info: "Se estima la energía necesaria para elevar un satélite de 500 kg hasta 800 km. La función integranda es m·g₀·R²/(R+y)², con R = 6 371 000 m y g₀ = 9.81 m/s².",
+          mode: "function",
+          unit: "J",
+          fn: "500*9.81*6371000^2/(6371000+x)^2",
+          a: 0,
+          b: 800000,
+          n: 8,
+          reference: 3.486236787e9,
+          refLabel: "Valor exacto de referencia",
+          note: "La altura y el radio de la Tierra están expresados en metros. El resultado representa una variación de energía en joules.",
+        },
+        26: {
+          title: "Área de un lago",
+          info: "El área se estima integrando el ancho del lago entre x = 40 y x = 260 millas. La guía indica una referencia de 9940 mi², pero no entrega una tabla oficial de anchuras; debes medirlas en la figura.",
+          mode: "table",
+          unit: "mi²",
+          factor: 1,
+          data: [],
+          reference: 9940,
+          refLabel: "Área de referencia del enunciado",
+          note: "Ingresa pares x, anchura. Se recomienda medir cada 20 millas. Sin una tabla común de anchuras, la aproximación puede variar.",
+        },
+        27: {
+          title: "Volumen de un objeto alargado",
+          info: "Se aproxima el volumen con V = π∫r² dz, usando r = d/2. Los diámetros de la tabla están en pulgadas y la longitud en pulgadas.",
+          mode: "table",
+          unit: "in³",
+          factor: Math.PI,
+          data: [
+            [0, 0],
+            [1, 2.6],
+            [2, 3.2],
+            [3, 4.8],
+            [4, 5.6],
+            [5, 6.0],
+            [6, 6.2],
+            [7, 6.0],
+            [8, 5.6],
+            [9, 4.8],
+            [10, 3.3],
+            [11, 2.6],
+            [12, 0],
+          ],
+          reference: 201.842092,
+          refLabel: "Referencia aproximada de volumen",
+          transform: "radiusSquared",
+          note: "Para calcular el volumen, se integra π(d/2)². La fórmula de superficie del enunciado omite el efecto de la pendiente, por eso no se calcula como superficie exacta aquí.",
+        },
+      };
+
+      let lastResult = null;
+
+      function setMessage(text, type = "notice") {
+        $("message").innerHTML = text
+          ? `<div class="${type}">${text}</div>`
+          : "";
+      }
+      function fmt(value, digits = 6) {
+        if (!Number.isFinite(value)) return "No definido";
+        return value.toLocaleString("es-BO", {
+          maximumFractionDigits: digits,
+          minimumFractionDigits: Math.min(2, digits),
+        });
+      }
+      function fmtFull(value) {
+        if (!Number.isFinite(value)) return "No definido";
+        return value.toFixed(6);
+      }
+      function currentExercise() {
+        return exercises[$("exercise").value];
+      }
+
+      function renderExerciseInfo() {
+        const ex = currentExercise();
+        $("exerciseInfo").innerHTML =
+          `<strong>${ex.title}.</strong> ${ex.info}`;
+        $("unit").value = ex.unit;
+        $("mode").value = ex.mode;
+        toggleMode();
+      }
+      function toggleMode() {
+        const isTable = $("mode").value === "table";
+        $("tableInputs").classList.toggle("hidden", !isTable);
+        $("functionInputs").classList.toggle("hidden", isTable);
+      }
+      function loadExample() {
+        const id = $("exercise").value,
+          ex = currentExercise();
+        $("mode").value = ex.mode;
+        toggleMode();
+        $("unit").value = ex.unit;
+        if (ex.mode === "table") {
+          if (id === "26") {
+            $("dataInput").value = "";
+            $("dataInput").placeholder =
+              "Ingresa las anchuras medidas. Ejemplo de formato:\n40, anchura\n60, anchura\n80, anchura\n...\n260, anchura";
+            setMessage(
+              "El documento no proporciona las anchuras del lago. Introduce las mediciones que obtengas de la figura para calcular el área.",
+              "notice",
+            );
+          } else {
+            $("dataInput").value = ex.data
+              .map((p) => `${p[0]}, ${p[1]}`)
+              .join("\n");
+            $("dataInput").placeholder = "x, y";
+            setMessage(
+              "Datos de ejemplo cargados. Puedes editarlos antes de calcular.",
+              "success",
+            );
+          }
+        } else {
+          $("functionInput").value = ex.fn;
+          $("lower").value = ex.a;
+          $("upper").value = ex.b;
+          $("intervals").value = ex.n;
+          setMessage(
+            "Función y límites de ejemplo cargados. Puedes modificarlos.",
+            "success",
+          );
+        }
+        $("resultsSection").classList.add("hidden");
+      }
+      function loadValidation() {
+        $("mode").value = "function";
+        toggleMode();
+        $("functionInput").value = "x^2";
+        $("lower").value = "0";
+        $("upper").value = "2";
+        $("intervals").value = "4";
+        $("unit").value = "unidades³";
+        $("method").value = "all";
+        setMessage(
+          "Prueba cargada. La integral exacta de x² entre 0 y 2 es 8/3 ≈ 2.666667.",
+          "success",
+        );
+        $("resultsSection").classList.add("hidden");
+      }
+      function clearInputs() {
+        if ($("mode").value === "table") $("dataInput").value = "";
+        else $("functionInput").value = "";
+        $("resultsSection").classList.add("hidden");
+        setMessage("Datos limpiados.");
+      }
+      function parseTable() {
+        const lines = $("dataInput")
+          .value.split(/\n/)
+          .map((s) => s.trim())
+          .filter(Boolean);
+        if (lines.length < 2)
+          throw new Error("Ingresa al menos dos pares de datos x, y.");
+        const points = lines.map((line, i) => {
+          const parts = line.split(/[;, \t]+/).filter(Boolean);
+          if (parts.length !== 2)
+            throw new Error(
+              `La línea ${i + 1} debe tener exactamente dos valores: x, y.`,
+            );
+          const x = Number(parts[0].replace(",", "."));
+          const y = Number(parts[1].replace(",", "."));
+          if (!Number.isFinite(x) || !Number.isFinite(y))
+            throw new Error(`Hay un dato no numérico en la línea ${i + 1}.`);
+          return { x, y };
+        });
+        for (let i = 1; i < points.length; i++) {
+          if (points[i].x <= points[i - 1].x)
+            throw new Error(
+              "Los valores x deben estar en orden creciente y no repetirse.",
+            );
+        }
+        // En el ejercicio 27 se ingresan diámetros, pero el volumen requiere integrar r² = (d/2)².
+        if ($("exercise").value === "27")
+          points.forEach((p) => {
+            p.y = Math.pow(p.y / 2, 2);
+          });
+        const hs = points.slice(1).map((p, i) => p.x - points[i].x);
+        const h = hs[0];
+        const uniform = hs.every(
+          (v) => Math.abs(v - h) <= 1e-7 * Math.max(1, Math.abs(h)),
+        );
+        return { points, h, uniform };
+      }
+
+      // Parser aritmético pequeño; no usa eval() ni ejecuta código escrito por el usuario.
+      function compileExpression(source) {
+        const tokens = source.match(
+          /(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?|[a-zA-Z_]+|[()+\-*/^]/gi,
+        );
+        if (!tokens || tokens.join("") !== source.replace(/\s+/g, ""))
+          throw new Error(
+            "La función contiene caracteres no válidos. Revisa la expresión.",
+          );
+        let pos = 0;
+        const peek = () => tokens[pos];
+        const take = () => tokens[pos++];
+        function primary() {
+          const t = take();
+          if (t === undefined) throw new Error("La función está incompleta.");
+          if (t === "+") return primary();
+          if (t === "-") return { type: "neg", arg: primary() };
+          if (t === "(") {
+            const node = expression();
+            if (take() !== ")")
+              throw new Error("Falta un paréntesis de cierre.");
+            return node;
+          }
+          if (/^(?:\d|\.)/.test(t)) return { type: "num", value: Number(t) };
+          const name = t.toLowerCase();
+          if (name === "x") return { type: "x" };
+          if (name === "pi") return { type: "num", value: Math.PI };
+          if (name === "e") return { type: "num", value: Math.E };
+          const funcs = [
+            "sin",
+            "cos",
+            "tan",
+            "sqrt",
+            "abs",
+            "exp",
+            "log",
+            "ln",
+            "sinh",
+            "cosh",
+            "tanh",
+          ];
+          if (funcs.includes(name)) {
+            if (take() !== "(")
+              throw new Error(`Escribe ${name}(x) con paréntesis.`);
+            const arg = expression();
+            if (take() !== ")")
+              throw new Error(`Falta cerrar la función ${name}.`);
+            return { type: "func", name, arg };
+          }
+          throw new Error(
+            `No reconozco "${t}". Usa x, pi, e o una función permitida.`,
+          );
+        }
+        function power() {
+          let node = primary();
+          if (peek() === "^") {
+            take();
+            node = { type: "bin", op: "^", left: node, right: unary() };
+          }
+          return node;
+        }
+        function unary() {
+          if (peek() === "+" || peek() === "-") return primary();
+          return power();
+        }
+        function term() {
+          let node = unary();
+          while (peek() === "*" || peek() === "/") {
+            const op = take();
+            node = { type: "bin", op, left: node, right: unary() };
+          }
+          return node;
+        }
+        function expression() {
+          let node = term();
+          while (peek() === "+" || peek() === "-") {
+            const op = take();
+            node = { type: "bin", op, left: node, right: term() };
+          }
+          return node;
+        }
+        const ast = expression();
+        if (pos !== tokens.length)
+          throw new Error(
+            `No se pudo interpretar la parte "${tokens.slice(pos).join("")}".`,
+          );
+        function evaluate(n, x) {
+          switch (n.type) {
+            case "num":
+              return n.value;
+            case "x":
+              return x;
+            case "neg":
+              return -evaluate(n.arg, x);
+            case "func": {
+              const a = evaluate(n.arg, x);
+              const f = {
+                sin: Math.sin,
+                cos: Math.cos,
+                tan: Math.tan,
+                sqrt: Math.sqrt,
+                abs: Math.abs,
+                exp: Math.exp,
+                log: Math.log,
+                ln: Math.log,
+                sinh: Math.sinh,
+                cosh: Math.cosh,
+                tanh: Math.tanh,
+              }[n.name];
+              return f(a);
+            }
+            case "bin": {
+              const a = evaluate(n.left, x),
+                b = evaluate(n.right, x);
+              if (n.op === "+") return a + b;
+              if (n.op === "-") return a - b;
+              if (n.op === "*") return a * b;
+              if (n.op === "/") return a / b;
+              return Math.pow(a, b);
+            }
+          }
+        }
+        return (x) => evaluate(ast, x);
+      }
+      function functionPoints() {
+        const a = Number($("lower").value),
+          b = Number($("upper").value),
+          n = Number($("intervals").value);
+        if (!Number.isFinite(a) || !Number.isFinite(b) || a === b)
+          throw new Error("Los límites a y b deben ser números diferentes.");
+        if (b < a)
+          throw new Error(
+            "El límite superior b debe ser mayor que el límite inferior a.",
+          );
+        if (!Number.isInteger(n) || n < 1 || n > 5000)
+          throw new Error("n debe ser un entero entre 1 y 5000.");
+        const f = compileExpression($("functionInput").value);
+        const h = (b - a) / n,
+          points = [];
+        for (let i = 0; i <= n; i++) {
+          const x = a + i * h,
+            y = f(x);
+          if (!Number.isFinite(y))
+            throw new Error(
+              `La función no da un valor válido en x = ${x}. Revisa el dominio.`,
+            );
+          points.push({ x, y });
+        }
+        return { points, h, uniform: true };
+      }
+      function trapezoid(points, h) {
+        let sum = (points[0].y + points[points.length - 1].y) / 2;
+        for (let i = 1; i < points.length - 1; i++) sum += points[i].y;
+        return h * sum;
+      }
+      function simpson13(points, h) {
+        const n = points.length - 1;
+        if (n % 2 !== 0)
+          throw new Error(
+            "Simpson 1/3 necesita un número par de subintervalos.",
+          );
+        let sum = points[0].y + points[n].y;
+        for (let i = 1; i < n; i++) sum += (i % 2 === 1 ? 4 : 2) * points[i].y;
+        return (h * sum) / 3;
+      }
+      function simpson38(points, h) {
+        const n = points.length - 1;
+        if (n % 3 !== 0)
+          throw new Error("Simpson 3/8 necesita que n sea múltiplo de 3.");
+        let sum = points[0].y + points[n].y;
+        for (let i = 1; i < n; i++) sum += (i % 3 === 0 ? 2 : 3) * points[i].y;
+        return (3 * h * sum) / 8;
+      }
+      function simpsonCombined(points, h) {
+        const n = points.length - 1;
+        if (n < 5 || n % 2 === 0)
+          throw new Error(
+            "Simpson combinado de esta página requiere un número impar de subintervalos, n ≥ 5 (por ejemplo, n = 7).",
+          );
+        const split = n - 3;
+        const first = simpson13(points.slice(0, split + 1), h);
+        const second = simpson38(points.slice(split), h);
+        return first + second;
+      }
+      function weightsFor(method, n) {
+        if (method === "trapezoid")
+          return Array.from({ length: n + 1 }, (_, i) =>
+            i === 0 || i === n ? 0.5 : 1,
+          );
+        if (method === "simpson13")
+          return Array.from({ length: n + 1 }, (_, i) =>
+            i === 0 || i === n ? 1 : i % 2 ? 4 : 2,
+          );
+        if (method === "simpson38")
+          return Array.from({ length: n + 1 }, (_, i) =>
+            i === 0 || i === n ? 1 : i % 3 === 0 ? 2 : 3,
+          );
+        if (method === "combined") {
+          const split = n - 3;
+          return Array.from({ length: n + 1 }, (_, i) => {
+            if (i <= split)
+              return (i === 0 || i === split ? 1 : i % 2 ? 4 : 2) / 3;
+            const j = i - split;
+            return ((j === 0 || j === 3 ? 1 : j % 3 === 0 ? 2 : 3) * 3) / 8;
+          });
+        }
+        return [];
+      }
+      function methodList(method, n) {
+        const list = [];
+        if (method === "all" || method === "trapezoid")
+          list.push(["Trapecio compuesto", "trapezoid"]);
+        if ((method === "all" || method === "simpson13") && n % 2 === 0)
+          list.push(["Simpson 1/3", "simpson13"]);
+        if ((method === "all" || method === "simpson38") && n % 3 === 0)
+          list.push(["Simpson 3/8", "simpson38"]);
+        if (
+          (method === "all" || method === "combined") &&
+          n >= 5 &&
+          n % 2 === 1
+        )
+          list.push(["Simpson combinado", "combined"]);
+        if (method !== "all" && list.length === 0) {
+          if (method === "simpson13")
+            throw new Error("No se puede aplicar Simpson 1/3: n debe ser par.");
+          if (method === "simpson38")
+            throw new Error(
+              "No se puede aplicar Simpson 3/8: n debe ser múltiplo de 3.",
+            );
+          if (method === "combined")
+            throw new Error(
+              "Para Simpson combinado usa un n impar de al menos 5, por ejemplo n = 7.",
+            );
+        }
+        return list;
+      }
+      function runMethod(points, h, method) {
+        if (method === "trapezoid") return trapezoid(points, h);
+        if (method === "simpson13") return simpson13(points, h);
+        if (method === "simpson38") return simpson38(points, h);
+        return simpsonCombined(points, h);
+      }
+      function getReference() {
+        const ex = currentExercise();
+        if (
+          $("mode").value === "function" &&
+          $("functionInput").value.replace(/\s/g, "") === "x^2" &&
+          Number($("lower").value) === 0 &&
+          Number($("upper").value) === 2
+        )
+          return 8 / 3;
+        return ex.reference;
+      }
+      function getResult() {
+        const input =
+          $("mode").value === "table" ? parseTable() : functionPoints();
+        if (!input.uniform)
+          throw new Error(
+            "Los valores x no tienen un espaciamiento uniforme. Para esta calculadora, los métodos de Simpson requieren intervalos iguales. Revisa los datos.",
+          );
+        const n = input.points.length - 1,
+          h = input.h;
+        if (n < 1) throw new Error("Se necesitan al menos dos puntos.");
+        const methods = methodList($("method").value, n);
+        const results = methods.map(([label, key]) => ({
+          label,
+          key,
+          raw: runMethod(input.points, h, key),
+        }));
+        const esPrueba =
+          $("mode").value === "function" &&
+          $("functionInput").value.replace(/\s/g, "") === "x^2" &&
+          Number($("lower").value) === 0 &&
+          Number($("upper").value) === 2;
+
+        const factor = esPrueba ? 1 : currentExercise().factor || 1;
+        results.forEach((r) => (r.value = r.raw * factor));
+        const reference = getReference();
+        const scale = factor;
+        const refScaled =
+          reference !== undefined && reference !== null ? reference : null;
+        const errors = results.map((r) => ({
+          label: r.label,
+          value: r.value,
+          absolute: refScaled !== null ? Math.abs(refScaled - r.value) : null,
+          percent:
+            refScaled !== null && refScaled !== 0
+              ? (100 * Math.abs(refScaled - r.value)) / Math.abs(refScaled)
+              : null,
+        }));
+        return { input, n, h, results, errors, reference: refScaled };
+      }
+      function calculate() {
+        try {
+          setMessage("");
+          const result = getResult();
+          lastResult = result;
+          showResults(result);
+          $("resultsSection").classList.remove("hidden");
+          $("resultsSection").scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        } catch (e) {
+          $("resultsSection").classList.add("hidden");
+          setMessage(e.message, "error");
+        }
+      }
+      function showResults(r) {
+        const unit = $("unit").value.trim() || "unidades";
+        $("resultCards").innerHTML = r.results
+          .map(
+            (res) => `
+    <div class="result">
+      <div class="name">${res.label}</div>
+      <div class="value">${fmtFull(res.value)}</div>
+      <div class="unit">${unit}</div>
+    </div>`,
+          )
+          .join("");
+        const methodForWeights = r.results.length
+          ? r.results[0].key
+          : "trapezoid";
+        const n = r.n,
+          pts = r.input.points;
+        let rows = "";
+        if (methodForWeights === "combined") {
+          const split = n - 3;
+          for (let i = 0; i < pts.length; i++) {
+            let weight, part;
+            if (i <= split) {
+              weight = (i === 0 || i === split ? 1 : i % 2 ? 4 : 2) / 3;
+              part = "Simpson 1/3";
+            } else {
+              const j = i - split;
+              weight = ((j === 0 || j === 3 ? 1 : j % 3 === 0 ? 2 : 3) * 3) / 8;
+              part = "Simpson 3/8";
+            }
+            rows += `<tr><td>${i}</td><td>${fmtFull(pts[i].x)}</td><td>${fmtFull(pts[i].y)}</td><td>${fmtFull(weight)}</td><td>${part}</td></tr>`;
+          }
+        } else {
+          const weights = weightsFor(methodForWeights, n);
+          for (let i = 0; i < pts.length; i++) {
+            rows += `<tr><td>${i}</td><td>${fmtFull(pts[i].x)}</td><td>${fmtFull(pts[i].y)}</td><td>${weights[i] === undefined ? "—" : fmtFull(weights[i])}</td><td>${methodForWeights === "trapezoid" ? "Trapecio" : r.results[0].label}</td></tr>`;
+          }
+        }
+        $("weightsTable").innerHTML =
+          `<table><thead><tr><th>i</th><th>xᵢ</th><th>f(xᵢ) / yᵢ</th><th>Peso aplicado</th><th>Método</th></tr></thead><tbody>${rows}</tbody></table>
+  <p class="small">h = ${fmtFull(r.h)} · n = ${n}. La columna de pesos muestra los coeficientes usados; en Simpson combinado se muestran los coeficientes de cada tramo.</p>`;
+        drawChart(pts);
+        $("graphNote").textContent =
+          currentExercise().note ||
+          "El gráfico representa los datos ingresados y el área aproximada bajo la curva.";
+        let comp = "";
+        if (r.errors.length) {
+          comp += `<div class="table-wrap"><table><thead><tr><th>Método</th><th>Resultado (${unit})</th><th>Error absoluto</th><th>Error porcentual</th></tr></thead><tbody>`;
+          for (const e of r.errors) {
+            comp += `<tr><td>${e.label}</td><td>${fmtFull(e.value)}</td><td>${e.absolute === null ? "No disponible" : fmtFull(e.absolute)}</td><td>${e.percent === null ? "No disponible" : fmt(e.percent, 4) + "%"}</td></tr>`;
+          }
+          comp += "</tbody></table></div>";
+        }
+        if ($("mode").value === "function") {
+          try {
+            const f = compileExpression($("functionInput").value);
+            const a = Number($("lower").value),
+              b = Number($("upper").value);
+            const makePoints = (n) => {
+              const h = (b - a) / n,
+                ps = [];
+              for (let i = 0; i <= n; i++) {
+                const x = a + i * h,
+                  y = f(x);
+                if (!Number.isFinite(y)) throw new Error("Función no válida");
+                ps.push({ x, y });
+              }
+              return { ps, h };
+            };
+            const calcN = (n) => {
+              const q = makePoints(n);
+              return {
+                n,
+                trap: trapezoid(q.ps, q.h),
+                s13: simpson13(q.ps, q.h),
+              };
+            };
+            const c4 = calcN(4),
+              c8 = calcN(8),
+              factor = currentExercise().factor || 1;
+            comp += `<h3>Comparación adicional con n = 4 y n = 8</h3><div class="table-wrap"><table><thead><tr><th>Subintervalos</th><th>Trapecio</th><th>Simpson 1/3</th></tr></thead><tbody><tr><td>4</td><td>${fmtFull(c4.trap * factor)} ${unit}</td><td>${fmtFull(c4.s13 * factor)} ${unit}</td></tr><tr><td>8</td><td>${fmtFull(c8.trap * factor)} ${unit}</td><td>${fmtFull(c8.s13 * factor)} ${unit}</td></tr></tbody></table></div>`;
+          } catch (err) {
+            /* La comparación adicional no sustituye el resultado principal. */
+          }
+        }
+        if (r.reference !== null && r.reference !== undefined) {
+          comp += `<p class="notice"><strong>Valor de referencia:</strong> ${fmtFull(r.reference)} ${unit}. Este valor se toma del solucionario del ejercicio o de la prueba x² cuando corresponde. El error solo es significativo si los datos y las unidades coinciden con la referencia.</p>`;
+        } else {
+          comp += `<p class="notice">No se ha definido un valor exacto o de referencia para estos datos, así que no se puede calcular el error verdadero.</p>`;
+        }
+        $("comparison").innerHTML = comp;
+      }
+      function drawChart(points) {
+        const canvas = $("chart"),
+          ctx = canvas.getContext("2d");
+        const rect = canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.max(600, Math.floor(rect.width * dpr));
+        canvas.height = Math.floor(320 * dpr);
+        const W = canvas.width,
+          H = canvas.height;
+        ctx.clearRect(0, 0, W, H);
+        const pad = { l: 65 * dpr, r: 25 * dpr, t: 25 * dpr, b: 45 * dpr };
+        const xs = points.map((p) => p.x),
+          ys = points.map((p) => p.y);
+        let xmin = Math.min(...xs),
+          xmax = Math.max(...xs),
+          ymin = Math.min(0, ...ys),
+          ymax = Math.max(...ys);
+        if (xmax === xmin) {
+          xmax = xmin + 1;
+        }
+        if (ymax === ymin) {
+          ymax = ymin + 1;
+        }
+        const yrange = ymax - ymin;
+        ymin -= yrange * 0.08;
+        ymax += yrange * 0.12;
+        const X = (x) =>
+          pad.l + ((x - xmin) / (xmax - xmin)) * (W - pad.l - pad.r);
+        const Y = (y) =>
+          H - pad.b - ((y - ymin) / (ymax - ymin)) * (H - pad.t - pad.b);
+        ctx.strokeStyle = "#e2e8f0";
+        ctx.lineWidth = 1 * dpr;
+        for (let i = 0; i <= 5; i++) {
+          const y = pad.t + (i * (H - pad.t - pad.b)) / 5;
+          ctx.beginPath();
+          ctx.moveTo(pad.l, y);
+          ctx.lineTo(W - pad.r, y);
+          ctx.stroke();
+        }
+        ctx.fillStyle = "#475569";
+        ctx.font = `${12 * dpr}px Arial`;
+        ctx.textAlign = "right";
+        for (let i = 0; i <= 5; i++) {
+          const val = ymax - (i * (ymax - ymin)) / 5;
+          const y = pad.t + (i * (H - pad.t - pad.b)) / 5;
+          ctx.fillText(val.toFixed(2), pad.l - 8 * dpr, y + 4 * dpr);
+        }
+        ctx.textAlign = "center";
+        for (let i = 0; i <= 4; i++) {
+          const val = xmin + (i * (xmax - xmin)) / 4,
+            x = X(val);
+          ctx.fillText(val.toFixed(2), x, H - pad.b + 22 * dpr);
+        }
+        // Relleno bajo la curva
+        ctx.beginPath();
+        ctx.moveTo(X(points[0].x), Y(0));
+        points.forEach((p) => ctx.lineTo(X(p.x), Y(p.y)));
+        ctx.lineTo(X(points[points.length - 1].x), Y(0));
+        ctx.closePath();
+        ctx.fillStyle = "rgba(234,179,8,.22)";
+        ctx.fill();
+        // Línea
+        ctx.beginPath();
+        points.forEach((p, i) => {
+          if (i === 0) ctx.moveTo(X(p.x), Y(p.y));
+          else ctx.lineTo(X(p.x), Y(p.y));
+        });
+        ctx.strokeStyle = "#dc2626";
+        ctx.lineWidth = 2.5 * dpr;
+        ctx.stroke();
+        points.forEach((p) => {
+          ctx.beginPath();
+          ctx.arc(X(p.x), Y(p.y), 3.5 * dpr, 0, Math.PI * 2);
+          ctx.fillStyle = "#1e293b";
+          ctx.fill();
+        });
+        ctx.strokeStyle = "#94a3b8";
+        ctx.lineWidth = 1 * dpr;
+        ctx.strokeRect(pad.l, pad.t, W - pad.l - pad.r, H - pad.t - pad.b);
+        ctx.fillStyle = "#1e293b";
+        ctx.font = `bold ${13 * dpr}px Arial`;
+        ctx.fillText("x", W / 2, H - 5 * dpr);
+        ctx.save();
+        ctx.translate(17 * dpr, H / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillText("f(x) / y", 0, 0);
+        ctx.restore();
+      }
+      $("exercise").addEventListener("change", () => {
+        renderExerciseInfo();
+        loadExample();
+      });
+      $("mode").addEventListener("change", toggleMode);
+      $("loadExample").addEventListener("click", loadExample);
+      $("validationTest").addEventListener("click", loadValidation);
+      $("calculate").addEventListener("click", calculate);
+      $("clear").addEventListener("click", clearInputs);
+      window.addEventListener("resize", () => {
+        if (lastResult) drawChart(lastResult.input.points);
+      });
+      renderExerciseInfo();
+      loadExample();
+    </script>
+  </body>
+</html>
